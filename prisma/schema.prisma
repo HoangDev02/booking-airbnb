@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id       Int      @id @default(autoincrement())
+  username String
+  email String @unique
+  password String
+  country String?
+  img String?
+  city String?
+  phone Int? 
+  roleId   Int
+  role     Role     @relation(fields: [roleId], references: [id])
+  hotels Hotel[]
+  bookings Booking[]
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+model Hotel {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  categoryId   Int
+  category     Category @relation(fields: [categoryId], references: [id])
+  name         String
+  type         String
+  city         String
+  address      String
+  distance     String
+  photos       String[]
+  title        String
+  desc         String
+  rating       Float    @default(0)
+  cheapestPrice Float
+  featured     Boolean  @default(false)
+  lat          Float?
+  long         Float?
+  slug         String   @unique
+  createdAt    DateTime @default(now())
+  room        Room[]
+  @@unique([name, city]) // Unique constraint nếu cần
+}
+model Category {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  icon    String
+  hotels  Hotel[]
+  createdAt DateTime @default(now())
+}
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  users     User[]
+  createdAt DateTime @default(now())
+}
+
+model Room {
+  id           Int         @id @default(autoincrement())
+  hotelId      Int
+  hotel        Hotel       @relation(fields: [hotelId], references: [id])
+  title        String
+  price        Float
+  maxPeople    Int
+  desc         String
+  slug         String      @unique
+  roomNumbers  RoomNumber[]
+  bookings     BookingRoom[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model RoomNumber {
+  id              Int         @id @default(autoincrement())
+  roomId          Int
+  room            Room        @relation(fields: [roomId], references: [id])
+  bookingRoomId   Int         @map("bookingRoom_id")
+  bookingRoom     BookingRoom @relation(fields: [bookingRoomId], references: [id])
+  number          Int
+  unavailableDates DateTime[]
+}
+model Booking {
+  id           Int           @id @default(autoincrement())
+  leaveId      Int
+  user         User          @relation(fields: [leaveId], references: [id])
+  name         String
+  phone        Int
+  rooms        BookingRoom[]
+  active       Boolean       @default(false)
+  modifiedOn   DateTime      @default(now())
+}
+
+model BookingRoom {
+  id            Int         @id @default(autoincrement())
+  bookingId     Int
+  booking       Booking     @relation(fields: [bookingId], references: [id])
+  roomId        Int
+  room          Room        @relation(fields: [roomId], references: [id])
+  quantity      Int
+  total         Float
+  price         Float
+  roomNumbers   RoomNumber[]
+}
