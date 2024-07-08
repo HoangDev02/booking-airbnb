@@ -24,9 +24,6 @@ export class RoleAuthGuard implements CanActivate {
     if (!user || !user.roleId) {
       return false; // Không cho phép truy cập nếu không có user hoặc không có roleId
     }
-
-    console.log(user); // Kiểm tra log user để xem roleId có được gán đúng không
-
     return requiredRoles.some((role) => user.roleId === role);
   }
 }

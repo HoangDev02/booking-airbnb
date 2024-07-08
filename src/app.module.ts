@@ -10,6 +10,10 @@ import { BookingModule } from './booking/booking.module';
 import { RoleAuthGuard } from './auth/guard';
 import { APP_GUARD } from '@nestjs/core';
 import { UserModule } from './user/user.module';
+import { RoomService } from './room/room.service';
+import { RoomController } from './room/room.controller';
+import { RoomModule } from './room/room.module';
+import { RoomNumberModule } from './room-number/room-number.module';
 @Module({
   imports: [
       AuthModule,
@@ -19,6 +23,8 @@ import { UserModule } from './user/user.module';
       CategoriesModule,
       BookingModule,
       UserModule,
+      RoomModule,
+      RoomNumberModule,
     ],
   providers: [
     
@@ -26,6 +32,9 @@ import { UserModule } from './user/user.module';
       provide: APP_GUARD,
       useClass: RoleAuthGuard,
     },
+    
+    RoomService,
   ],
+  controllers: [RoomController],
 })
 export class AppModule {}

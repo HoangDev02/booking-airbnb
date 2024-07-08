@@ -82,33 +82,33 @@ model Room {
 }
 
 model RoomNumber {
-  id              Int         @id @default(autoincrement())
+  id              Int          @id @default(autoincrement())
   roomId          Int
-  room            Room        @relation(fields: [roomId], references: [id])
-  bookingRoomId   Int         @map("bookingRoom_id")
-  bookingRoom     BookingRoom @relation(fields: [bookingRoomId], references: [id])
+  room            Room         @relation(fields: [roomId], references: [id])
   number          Int
   unavailableDates DateTime[]
+  bookingRoomId   Int?         // Nullable field
+  bookingRoom     BookingRoom? @relation(fields: [bookingRoomId], references: [id])
 }
 model Booking {
-  id           Int           @id @default(autoincrement())
-  leaveId      Int
-  user         User          @relation(fields: [leaveId], references: [id])
-  name         String
-  phone        Int
-  rooms        BookingRoom[]
-  active       Boolean       @default(false)
-  modifiedOn   DateTime      @default(now())
+  id              Int          @id @default(autoincrement())
+  userId          Int
+  user            User         @relation(fields: [userId], references: [id])
+  name            String
+  phone           Int
+  rooms           BookingRoom[]
+  active          Boolean      @default(false)
+  modifiedOn      DateTime     @default(now())
 }
 
 model BookingRoom {
-  id            Int         @id @default(autoincrement())
-  bookingId     Int
-  booking       Booking     @relation(fields: [bookingId], references: [id])
-  roomId        Int
-  room          Room        @relation(fields: [roomId], references: [id])
-  quantity      Int
-  total         Float
-  price         Float
-  roomNumbers   RoomNumber[]
+  id              Int          @id @default(autoincrement())
+  bookingId       Int
+  booking         Booking      @relation(fields: [bookingId], references: [id])
+  roomId          Int
+  room            Room         @relation(fields: [roomId], references: [id])
+  quantity        Int
+  total           Float
+  price           Float
+  roomNumbers     RoomNumber[]
 }
