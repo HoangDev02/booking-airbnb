@@ -1,11 +1,12 @@
 // src/hotels/dto/create-hotel.dto.ts
 
-import { IsInt, IsString, IsOptional, IsArray, IsBoolean, IsNumber, IsNotEmpty } from 'class-validator';
+import {IsString, IsOptional, IsArray, IsBoolean, IsNumber } from 'class-validator';
 
 export class CreateHotelDto {
+  @IsNumber()
+  categoryId: number;
   @IsString()
   name: string;
-
   @IsString()
   type: string;
 

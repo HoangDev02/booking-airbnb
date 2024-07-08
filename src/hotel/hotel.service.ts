@@ -5,14 +5,13 @@ import { CreateHotelDto } from './dto/createHotel.dto';
 @Injectable()
 export class HotelService {
     constructor(private prisma: PrismaService) {}
-    private userId:number = 1;
-    private  categoryId:number = 1;
-    async createHotel(dto: CreateHotelDto) {
+    // private userId:number = 1;
+    // private  categoryId:number = 1;
+    async createHotel(userId: number,dto: CreateHotelDto) {
        
         const hotel = await this.prisma.hotel.create({
             data: {
-                userId: this.userId,
-                categoryId: this.categoryId,
+                userId: userId,
                 ...dto,
             },
         })

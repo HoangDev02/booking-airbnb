@@ -1,17 +1,19 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, LoginDto } from './dto';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService) {}
 
-  async generateAccessToken(userId: number, email: string): Promise<{ access_token: string }> {
+  async generateAccessToken(userId: number, email: string,role: number): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
+      roles: role,
       email
     }
     const secret = this.config.get('JWT_SECRET')
@@ -43,7 +45,7 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(dto.password, salt)
       const user = await this.prisma.user.create({
         data: {
-          roleId: 0,
+          roleId: 2,
           email: dto.email,
           username: dto.username,
           password: hashedPassword
@@ -72,9 +74,9 @@ export class AuthService {
         throw new ForbiddenException('Invalid credentials');
       }
 
-      const accessToken = await this.generateAccessToken(user.id, user.email);
+      const accessToken = await this.generateAccessToken(user.id, user.email,user.roleId);
       const refreshToken = await this.generateRefreshToken(user.id, user.email);
-
+      
       return {
         ...accessToken,
         ...refreshToken
@@ -82,6 +84,35 @@ export class AuthService {
     } catch (error) {
       console.log(error);
       throw new ForbiddenException('Login failed');
+    }
+  }
+  async validateUserFromToken(token: string): Promise<User | null> {
+    
+    try {
+      const payload = await this.jwt.verifyAsync(token, {
+        secret: this.config.get('JWT_SECRET'),
+      });
+      
+      // Tìm kiếm thông tin người dùng từ payload.sub (ID người dùng trong token)
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: payload.sub,
+        },
+        include: {
+          role: true, // Bao gồm quan hệ 'role' từ người dùng
+        },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      // Trả về thông tin người dùng nếu xác thực thành công
+      return user;
+    } catch (error) {
+      console.log(error);
+      
+      throw new UnauthorizedException('Invalid token');
     }
   }
 }
