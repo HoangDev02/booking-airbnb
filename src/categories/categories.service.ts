@@ -41,4 +41,11 @@ export class CategoriesService {
             }
         });
     }
+    async deleteCategoryById(id: number) {
+        return this.prisma.category.delete({
+            where: {
+                id
+            }
+        });
+    }
 }

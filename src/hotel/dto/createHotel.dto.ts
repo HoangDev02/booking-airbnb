@@ -1,12 +1,14 @@
-// src/hotels/dto/create-hotel.dto.ts
-
-import {IsString, IsOptional, IsArray, IsBoolean, IsNumber } from 'class-validator';
+import { IsArray, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateHotelDto {
   @IsNumber()
+  @Type(() => Number)
   categoryId: number;
+
   @IsString()
   name: string;
+
   @IsString()
   type: string;
 
@@ -19,8 +21,9 @@ export class CreateHotelDto {
   @IsString()
   distance: string;
 
-  @IsArray()
-  photos: string[];
+  // @IsArray()
+  // @IsString({ each: true })
+  // photos: string[];
 
   @IsString()
   title: string;
@@ -29,23 +32,21 @@ export class CreateHotelDto {
   desc: string;
 
   @IsNumber()
+  @Type(() => Number)
   rating: number;
 
   @IsNumber()
+  @Type(() => Number)
   cheapestPrice: number;
-
-  @IsBoolean()
-  @IsOptional()
-  featured?: boolean;
-
-  @IsNumber()
-  @IsOptional()
-  lat?: number;
-
-  @IsNumber()
-  @IsOptional()
-  long?: number;
 
   @IsString()
   slug: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  lat: number; // Latitude
+  @IsNumber()
+  @Type(() => Number)
+  long: number; // Longitude
+
 }

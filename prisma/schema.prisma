@@ -50,7 +50,6 @@ model Hotel {
   slug         String   @unique
   createdAt    DateTime @default(now())
   room        Room[]
-  @@unique([name, city]) // Unique constraint nếu cần
 }
 model Category {
   id      Int     @id @default(autoincrement())
@@ -76,7 +75,7 @@ model Room {
   desc         String
   slug         String      @unique
   roomNumbers  RoomNumber[]
-  bookings     BookingRoom[]
+  bookings     Booking[]
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
@@ -87,8 +86,7 @@ model RoomNumber {
   room            Room         @relation(fields: [roomId], references: [id])
   number          Int
   unavailableDates DateTime[]
-  bookingRoomId   Int?         // Nullable field
-  bookingRoom     BookingRoom? @relation(fields: [bookingRoomId], references: [id])
+  @@unique([roomId, number])
 }
 model Booking {
   id              Int          @id @default(autoincrement())
@@ -96,19 +94,27 @@ model Booking {
   user            User         @relation(fields: [userId], references: [id])
   name            String
   phone           Int
-  rooms           BookingRoom[]
+  bookingRoom     BookingRoom[]
   active          Boolean      @default(false)
   modifiedOn      DateTime     @default(now())
+  roomId          Int
+  room            Room         @relation(fields: [roomId], references: [id])
 }
 
 model BookingRoom {
   id              Int          @id @default(autoincrement())
   bookingId       Int
   booking         Booking      @relation(fields: [bookingId], references: [id])
-  roomId          Int
-  room            Room         @relation(fields: [roomId], references: [id])
   quantity        Int
   total           Float
   price           Float
-  roomNumbers     RoomNumber[]
+  number          Int
+  unavailableDates DateTime[] // trường hợp nếu booking trong đặt ngày không chủ phòng cho thuê -> sẽ vào đây
+}
+model refreshToken {
+  id        Int      @id @default(autoincrement())
+  accessToken String
+  refreshToken String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

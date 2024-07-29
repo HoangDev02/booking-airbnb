@@ -30,4 +30,12 @@ export class RoomService {
             }
         });
     }
+    
+    async getRoomByIdHotel(id: number) {
+        return this.prisma.room.findMany({
+            where: {
+                hotelId: id
+            }
+        });
+    }
  }

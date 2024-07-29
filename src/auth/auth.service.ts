@@ -1,57 +1,78 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, LoginDto } from './dto';
-import * as bcrypt from "bcrypt";
+import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
-  async generateAccessToken(userId: number, email: string,role: number): Promise<{ access_token: string }> {
+  async generateAccessToken(
+    userId: number,
+    email: string,
+    role: number,
+  ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       roles: role,
-      email
-    }
-    const secret = this.config.get('JWT_SECRET')
-    const token = await this.jwt.signAsync(payload, { expiresIn: '15m', secret })
-    return { access_token: token }
+      email,
+    };
+    const secret = this.config.get('JWT_SECRET');
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '15m',
+      secret,
+    });
+    return { access_token: token };
   }
 
-  async generateRefreshToken(userId: number, email: string): Promise<{ refresh_token: string }> {
+  async generateRefreshToken(
+    userId: number,
+    email: string,
+  ): Promise<{ refresh_token: string }> {
     const payload = {
       sub: userId,
-      email
-    }
-    const secret = this.config.get('JWT_SECRET')
-    const token = await this.jwt.signAsync(payload, { expiresIn: '360d', secret })
-    return { refresh_token: token }
+      email,
+    };
+    const secret = this.config.get('JWT_SECRET');
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '360d',
+      secret,
+    });
+    return { refresh_token: token };
   }
-  
+
   async register(dto: AuthDto) {
     try {
       const existingEmail = await this.prisma.user.findUnique({
         where: {
-          email: dto.email
-        }
-      })
+          email: dto.email,
+        },
+      });
       if (existingEmail) {
-        throw new ForbiddenException('Email already exists')
+        throw new ForbiddenException('Email already exists');
       }
-      const salt = 10
-      const hashedPassword = await bcrypt.hash(dto.password, salt)
+      const salt = 10;
+      const hashedPassword = await bcrypt.hash(dto.password, salt);
       const user = await this.prisma.user.create({
         data: {
           roleId: 2,
           email: dto.email,
           username: dto.username,
-          password: hashedPassword
-        }
-      })
-      delete user.password
+          password: hashedPassword,
+        },
+      });
+      delete user.password;
       return user;
     } catch (error) {
       console.log(error);
@@ -59,40 +80,56 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto): Promise<{ access_token: string, refresh_token: string }> {
+  async login(
+    dto: LoginDto,
+  ): Promise<{
+    access_token: string;
+    refresh_token: string;
+    userId: number;
+    username: string;
+  }> {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { email: dto.email }
+        where: { email: dto.email },
       });
 
       if (!user) {
-        throw new ForbiddenException('Invalid credentials');
+        throw new ForbiddenException('Email dose not exits');
       }
 
       const passwordMatches = await bcrypt.compare(dto.password, user.password);
       if (!passwordMatches) {
-        throw new ForbiddenException('Invalid credentials');
+        throw new ForbiddenException('wrong password');
       }
 
-      const accessToken = await this.generateAccessToken(user.id, user.email,user.roleId);
+      const accessToken = await this.generateAccessToken(
+        user.id,
+        user.email,
+        user.roleId,
+      );
       const refreshToken = await this.generateRefreshToken(user.id, user.email);
-      
+
       return {
+        userId: user.id,
+        username: user.username,
         ...accessToken,
-        ...refreshToken
+        ...refreshToken,
       };
     } catch (error) {
-      console.log(error);
-      throw new ForbiddenException('Login failed');
+      throw new ForbiddenException(error.message);
     }
   }
-  async validateUserFromToken(token: string): Promise<User | null> {
+  // async refreshAccessToken(refreshToken: string) {
+  //   if (!refreshToken) return res.status(401).json("You're not authenticated");
     
+
+  // }
+  async validateUserFromToken(token: string): Promise<User | null> {
     try {
       const payload = await this.jwt.verifyAsync(token, {
         secret: this.config.get('JWT_SECRET'),
       });
-      
+
       // Tìm kiếm thông tin người dùng từ payload.sub (ID người dùng trong token)
       const user = await this.prisma.user.findUnique({
         where: {
@@ -111,7 +148,7 @@ export class AuthService {
       return user;
     } catch (error) {
       console.log(error);
-      
+
       throw new UnauthorizedException('Invalid token');
     }
   }
