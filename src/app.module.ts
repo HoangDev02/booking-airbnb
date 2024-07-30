@@ -18,6 +18,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth/auth.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { SearchModule } from './search/search.module';
 @Module({
   imports: [
     AuthModule,
@@ -39,6 +40,7 @@ import { diskStorage } from 'multer';
         },
       }),
     }),
+    SearchModule,
   ],
   providers: [
     {

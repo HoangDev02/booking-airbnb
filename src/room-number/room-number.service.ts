@@ -6,7 +6,7 @@ import { CreateRoomNumberDto } from './dto';
 export class RoomNumberService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createRoomNumberDto: CreateRoomNumberDto) {
-    const { roomId, bookingRoomId, number, startDate, endDate } =
+    const { roomId,  number, startDate, endDate } =
       createRoomNumberDto;
 
     const formattedStartDate = new Date(startDate).toISOString();
