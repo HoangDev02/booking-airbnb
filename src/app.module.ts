@@ -19,6 +19,9 @@ import { AuthService } from './auth/auth.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { SearchModule } from './search/search.module';
+import { AmentitiesModule } from './amentities/amentities.module';
+import { OfferingModule } from './offering/offering.module';
+import { CommentsModule } from './comments/comments.module';
 @Module({
   imports: [
     AuthModule,
@@ -41,6 +44,9 @@ import { SearchModule } from './search/search.module';
       }),
     }),
     SearchModule,
+    AmentitiesModule,
+    OfferingModule,
+    CommentsModule,
   ],
   providers: [
     {
@@ -48,7 +54,7 @@ import { SearchModule } from './search/search.module';
       useClass: RoleAuthGuard,
     },
     RoomService,
-    AuthService, 
+    AuthService,
 
   ],
 })

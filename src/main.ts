@@ -18,6 +18,7 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.use(express.json());
+  app.setGlobalPrefix('api', {exclude: ['/']});
   await app.listen(8000);
 }
 bootstrap();

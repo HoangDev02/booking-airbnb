@@ -16,10 +16,9 @@ import { HotelService } from './hotel.service';
 import { CreateHotelDto } from './dto';
 import { JwtGuard, RoleAuthGuard } from 'src/auth/guard';
 import { getUser, Roles } from 'src/auth/decorator';
-import { Express } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-@Controller('api/hotels')
+@Controller('hotels')
 export class HotelController {
   constructor(private readonly hotelService: HotelService) {}
   @Get('write')

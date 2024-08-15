@@ -1,8 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { BookingService } from './booking.service';
-import { CreateBookingDto, updateBookingActiveDto } from './dto';
+import { CreateBookingDto, GetBookingsDto, updateBookingActiveDto } from './dto';
+import { JwtGuard } from 'src/auth/guard';
+import { getUser } from 'src/auth/decorator';
 
-@Controller('api/booking')
+@Controller('booking')
 export class BookingController {
     constructor(private readonly bookingService: BookingService) {}
 
@@ -24,5 +26,13 @@ export class BookingController {
     @Get('find/active/:roomId')
     async getBookingByIdAndactive(@Param('roomId', ParseIntPipe) roomId: number) {
       return this.bookingService.getBookingByRoomIdAndActive(roomId);
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('user/bookings')
+    async getBookingsByUserId(
+      @getUser('id', ParseIntPipe) userId: number
+    ): Promise<GetBookingsDto[]> {
+      return this.bookingService.getBookingIdHotelInRoom(userId);
     }
 }

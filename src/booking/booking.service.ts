@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { updateBookingActiveDto } from './dto';
+import { GetBookingsDto, updateBookingActiveDto } from './dto';
 
 @Injectable()
 export class BookingService {
@@ -107,5 +107,41 @@ export class BookingService {
     } catch (error) {
       throw new Error(`Failed to get booking: ${error.message}`);
     }
+  }
+
+  async getBookingIdHotelInRoom(userId: number): Promise<GetBookingsDto[]> {
+    const hotels = await this.prisma.hotel.findMany({
+      where: { userId },
+      include: {
+        room: {
+          include: {
+            bookings: {
+              include: {
+                room: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return hotels.map((hotel) => ({
+      hotelId: hotel.id,
+      hotelName: hotel.name,
+      bookings: hotel.room.flatMap((room) => room.bookings.map((booking) => ({
+        id: booking.id,
+        name: booking.name,
+        phone: booking.phone,
+        active: booking.active,
+        modifiedOn: booking.modifiedOn,
+        room: {
+          id: booking.room.id,
+          title: booking.room.title,
+          price: booking.room.price,
+          maxPeople: booking.room.maxPeople,
+          desc: booking.room.desc,
+        },
+      }))),
+    }));
   }
 }

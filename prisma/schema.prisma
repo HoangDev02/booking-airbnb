@@ -12,6 +12,15 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+enum HotelStatus {
+  pending
+  partial
+  paid
+}
+enum PaymentType {
+  partial
+  full
+}
 model User {
   id       Int      @id @default(autoincrement())
   username String
@@ -25,6 +34,7 @@ model User {
   role     Role     @relation(fields: [roleId], references: [id])
   hotels Hotel[]
   bookings Booking[]
+  comments    Comments[]
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
 }
@@ -43,6 +53,7 @@ model Hotel {
   title        String
   desc         String
   rating       Float    @default(0)
+  status       HotelStatus  @default(pending)  // 'pending', 'partial', 'paid'
   cheapestPrice Float
   featured     Boolean  @default(false)
   lat          Float?
@@ -50,6 +61,10 @@ model Hotel {
   slug         String   @unique
   createdAt    DateTime @default(now())
   room        Room[]
+  offering    Offering[]
+  amenities   Amenities[]
+  comments    Comments[]
+  serviceFee  ServiceFee[]
 }
 model Category {
   id      Int     @id @default(autoincrement())
@@ -93,12 +108,13 @@ model Booking {
   userId          Int
   user            User         @relation(fields: [userId], references: [id])
   name            String
-  phone           Int
+  phone           Int?
   bookingRoom     BookingRoom[]
   active          Boolean      @default(false)
   modifiedOn      DateTime     @default(now())
   roomId          Int
   room            Room         @relation(fields: [roomId], references: [id])
+  payment         Payment[]
 }
 
 model BookingRoom {
@@ -111,7 +127,51 @@ model BookingRoom {
   number          Int
   unavailableDates DateTime[] // trường hợp nếu booking trong đặt ngày không chủ phòng cho thuê -> sẽ vào đây
 }
-model refreshToken {
+
+//những ưu đãi có trong hotel
+model Offering {
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  icons String
+  hotelId Int
+  hotel Hotel @relation(fields: [hotelId], references: [id])
+}
+//những tiện nghi có trong hotel
+model Amenities {
+  id Int @id @default(autoincrement())
+  title String
+  icon String
+  hotelId Int
+  hotel Hotel @relation(fields: [hotelId], references: [id])
+}
+model Comments {
+  id Int @id @default(autoincrement())
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  HotelId Int
+  hotel Hotel @relation(fields: [HotelId], references: [id])
+  content String
+  createdAt DateTime @default(now())
+}
+model Payment {
+  id          Int      @id @default(autoincrement())
+  bookingId     Int
+  booking       Booking   @relation(fields: [bookingId], references: [id])
+  amount      Float
+  paymentType PaymentType   // 'partial', 'full'
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model ServiceFee {
+  id          Int      @id @default(autoincrement())
+  hotelId     Int
+  hotel       Hotel   @relation(fields: [hotelId], references: [id])
+  feeAmount   Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model RefreshToken {
   id        Int      @id @default(autoincrement())
   accessToken String
   refreshToken String

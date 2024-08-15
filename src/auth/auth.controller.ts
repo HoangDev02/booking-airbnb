@@ -2,7 +2,7 @@ import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto, LoginDto } from './dto';
 import { Response } from 'express';
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private prisma: AuthService) {}
 
