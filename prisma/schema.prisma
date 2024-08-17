@@ -114,7 +114,7 @@ model Booking {
   modifiedOn      DateTime     @default(now())
   roomId          Int
   room            Room         @relation(fields: [roomId], references: [id])
-  payment         Payment[]
+  payment         Payment[]  //one to one
 }
 
 model BookingRoom {
@@ -159,7 +159,7 @@ model Payment {
   bookingId     Int
   booking       Booking   @relation(fields: [bookingId], references: [id])
   amount      Float
-  paymentType PaymentType   // 'partial', 'full'
+  paymentType PaymentType   // 'partial 10% -> 20%', 'full 100%'
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -167,7 +167,7 @@ model ServiceFee {
   id          Int      @id @default(autoincrement())
   hotelId     Int
   hotel       Hotel   @relation(fields: [hotelId], references: [id])
-  feeAmount   Float
+  feeAmount   Float   @default(10)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

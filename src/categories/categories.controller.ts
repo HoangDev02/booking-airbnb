@@ -4,7 +4,7 @@ import { CreateCategoriesDto } from './dto';
 import { JwtGuard, RoleAuthGuard } from 'src/auth/guard';
 import { Roles } from 'src/auth/decorator';
 
-@Controller('api/categories')
+@Controller('categories')
 export class CategoriesController {
     constructor(private service: CategoriesService) {}
 

@@ -19,6 +19,6 @@ export class CreateBookingDto {
   @ValidateNested({ each: true })
   @Type(() => CreateBookingRoomDto)
   rooms: CreateBookingRoomDto[];
-
+  
   active: boolean; // Assuming active flag is passed in the DTO
 }

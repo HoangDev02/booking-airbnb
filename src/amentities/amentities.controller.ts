@@ -26,7 +26,7 @@ export class AmentitiesController {
 
     @Get("hotel/:hotelId")
     getAmentitiesByHotelId(@Param('hotelId', ParseIntPipe) hotelId:number) {
-        return this.service.getAmentity(hotelId)
+        return this.service.getAmentityByIdHotel(hotelId)
     }
     @Patch("update/:id")
     updateAmentityById(@Param('id', ParseIntPipe) id:number, dto: updateAmentities) {

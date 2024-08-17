@@ -1,12 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { ROLES_KEY } from '../decorator';
 
 @Injectable()
 export class RoleAuthGuard implements CanActivate {
+  
   constructor(private reflector: Reflector) {}
-
+  
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -21,8 +22,9 @@ export class RoleAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (!user || !user.roleId) {
-      return false; // Không cho phép truy cập nếu không có user hoặc không có roleId
+   if (!user || !user.roleId) {
+      
+      throw new ForbiddenException('You do not have permission (Role)'); 
     }
     return requiredRoles.some((role) => user.roleId === role);
   }

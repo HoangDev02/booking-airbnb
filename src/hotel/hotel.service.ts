@@ -1,8 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateHotelDto } from './dto/createHotel.dto';
 import * as admin from 'firebase-admin';
 import { FirebaseService } from 'src/firebase/firebseConnect';
+import { UpdateHotelStatusDto } from './dto';
+
+
 @Injectable()
 export class HotelService {
     constructor(private prisma: PrismaService, private readonly firebaseService: FirebaseService) {}
@@ -43,7 +46,7 @@ export class HotelService {
           return hotel;
         } catch (error) {
           console.error('Error creating hotel or uploading images:', error);
-          throw error;
+          throw new ForbiddenException('Error creating hotel or uploading images');
           
         }
       }
@@ -88,5 +91,36 @@ export class HotelService {
         return await this.prisma.hotel.findUnique({
             where: { slug: slug },
         });
+    }
+
+    //if user create hotel, admin can update status of hotel (active, inactive, pending)
+    async updateHotelStatus(hotelId: number, updateStatusDto: UpdateHotelStatusDto) {
+      const { status } = updateStatusDto;
+  
+      // Kiểm tra xem hotel có tồn tại không
+      const hotel = await this.prisma.hotel.findUnique({
+        where: { id: hotelId },
+      });
+  
+      if (!hotel) {
+        throw new NotFoundException(`Hotel with id ${hotelId} not found`);
+      }
+  
+      // Cập nhật status của hotel
+      const updatedHotel = await this.prisma.hotel.update({
+        where: { id: hotelId },
+        data: { status },
+      });
+  
+      return updatedHotel;
+    }
+    async getRatingHotel(hotelId: number) {
+      const hotel = await this.prisma.hotel.findUnique({
+      where: { id: hotelId },
+      });
+      if (!hotel) {
+      throw new ForbiddenException(`Hotel with id ${hotelId} not found`);
+      }
+      return { rating: hotel.rating };
     }
 }

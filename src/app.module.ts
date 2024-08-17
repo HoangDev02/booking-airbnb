@@ -61,8 +61,8 @@ import { CommentsModule } from './comments/comments.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Áp dụng middleware AuthMiddleware cho route '/api/hotels'
-    consumer.apply(AuthMiddleware).forRoutes('api/hotels');
+    consumer.apply(AuthMiddleware).forRoutes('hotels');
     // Áp dụng middleware AuthMiddleware cho route '/api/categories'
-    consumer.apply(AuthMiddleware).forRoutes('api/categories');
+    consumer.apply(AuthMiddleware).forRoutes('categories');
   }
 }

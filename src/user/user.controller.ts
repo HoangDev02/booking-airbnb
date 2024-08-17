@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/c
 import { UserService } from './user.service';
 import { UpdateRoleIdUserDto } from './dto';
 
-@Controller('api/users')
+@Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
     @Get(':id')

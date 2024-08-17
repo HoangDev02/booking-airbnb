@@ -16,4 +16,9 @@ export class CommentsController {
   async createComment(@getUser('id', ParseIntPipe) userId: number, @Body() dto: createCommentDto) {
     return this.service.createComment(userId,dto);
   }
+
+  @Get('count/:hotelId')
+  async countComment(@Param('hotelId', ParseIntPipe) hotel: number) {
+    return this.service.countCommentByHotelId(hotel);
+  }
 }

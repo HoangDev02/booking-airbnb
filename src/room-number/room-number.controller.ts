@@ -10,7 +10,7 @@ import {
 import { RoomNumberService } from './room-number.service';
 import { CreateRoomNumberDto } from './dto';
 
-@Controller('api/room-number')
+@Controller('room-number')
 export class RoomNumberController {
   constructor(private readonly roomNumberService: RoomNumberService) {}
   @Post('create')
