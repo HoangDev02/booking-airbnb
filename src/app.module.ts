@@ -22,11 +22,15 @@ import { SearchModule } from './search/search.module';
 import { AmentitiesModule } from './amentities/amentities.module';
 import { OfferingModule } from './offering/offering.module';
 import { CommentsModule } from './comments/comments.module';
+import { EmailModule } from './email/email.module';
+
+import { EncryptionModule } from './encryption/encryption.module';
 @Module({
   imports: [
     AuthModule,
     HotelModule,
     PrismaModule,
+    EmailModule,
     ConfigModule.forRoot({ isGlobal: true }),
     CategoriesModule,
     BookingModule,
@@ -47,6 +51,7 @@ import { CommentsModule } from './comments/comments.module';
     AmentitiesModule,
     OfferingModule,
     CommentsModule,
+    EncryptionModule,
   ],
   providers: [
     {

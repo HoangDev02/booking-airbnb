@@ -5,7 +5,7 @@ export class CreateHotelDto {
   @IsNumber()
   @Type(() => Number)
   categoryId: number;
-
+  
   @IsString()
   name: string;
 

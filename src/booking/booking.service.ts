@@ -2,24 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { GetBookingsDto, updateBookingActiveDto } from './dto';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService,
+      private readonly email: EmailService
+  ) {}
 
-  async createBooking(createBookingDto: CreateBookingDto) {
-    const { userId, name, phone, active, rooms, roomId } = createBookingDto;
-
+  async createBooking(userId: number,createBookingDto: CreateBookingDto) {
+    const {  name, phone, active, rooms, roomId } = createBookingDto;
+  
     try {
-      const user = this.prisma.user.findUnique({
+      // Fetch user and room information
+      const user = await this.prisma.user.findUnique({
         where: {
           id: userId,
         },
-        });
+      });
       if (!user) {
         throw new Error('User not found');
       }
-      const room = this.prisma.room.findUnique({
+  
+      const room = await this.prisma.room.findUnique({
         where: {
           id: roomId,
         },
@@ -27,12 +32,13 @@ export class BookingService {
       if (!room) {
         throw new Error('Room not found');
       }
-      // Create booking using Prisma's create method
+  
+      // Create booking
       const booking = await this.prisma.booking.create({
         data: {
           user: { connect: { id: userId } },
           name,
-          phone:Number(phone),
+          phone: Number(phone),
           active,
           room: { connect: { id: roomId } },
           bookingRoom: {
@@ -49,13 +55,41 @@ export class BookingService {
           bookingRoom: true,
         },
       });
-
+  
+      // Calculate number of days
+      const numberOfDays = rooms.reduce((totalDays, roomDto) => {
+        const startDate = new Date(roomDto.unavailableDates[0]);
+        const endDate = new Date(roomDto.unavailableDates[1]);
+        const days = (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
+        return totalDays + days;
+      }, 0);
+  
+      await this.email.sendMail(
+        user.email,  
+        'Booking Confirmation',
+        `Dear ${name},
+        
+        Thank you for your booking!
+  
+        Here are your booking details:
+        - Room: ${room.title}
+        - Check-in Date: ${rooms[0].unavailableDates[0]}  
+        - Check-out Date: ${rooms[0].unavailableDates[1]}  
+        - Number of Days: ${numberOfDays}
+  
+        We look forward to hosting you.
+  
+        Best regards,
+        Your Hotel Team`,
+      );
+  
       return booking;
     } catch (error) {
       // Handle any errors that occur during creation
       throw new Error(`Failed to create booking: ${error.message}`);
     }
   }
+  
 
   async getBookings() {
     try {
@@ -143,5 +177,29 @@ export class BookingService {
         },
       }))),
     }));
+  }
+
+  async getBookingByLeaveId(userId: number) {
+    try {
+      const booking = await this.prisma.booking.findMany({
+        include: {
+          room: {
+            select: {
+              hotel: {
+                select: {
+                  userId: true
+                }
+              }
+            }
+          },
+          bookingRoom: true
+        },
+      });
+      const leaveIdBooking = booking.filter((booking) => booking.room.hotel.userId === userId);
+      
+      return leaveIdBooking;
+    }catch(error) {
+      throw new Error(`Failed to get booking: ${error.message}`);
+    }
   }
 }

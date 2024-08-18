@@ -26,7 +26,7 @@ export class HotelController {
   async writeDataToFirebase() {
     return this.hotelService.testFirebase();
   }
-  
+
   @Post('create')
   @UseInterceptors(FilesInterceptor('photos', 15))
   @UseGuards(JwtGuard, RoleAuthGuard)
@@ -36,13 +36,11 @@ export class HotelController {
     @getUser('id', ParseIntPipe) userId: number,
     @UploadedFiles() images: Express.Multer.File[],
   ) {
-
-      const buffers = images.map(file => file.buffer);
-      return await this.hotelService.createHotel(userId, dto, buffers);
-    
+    const buffers = images.map((file) => file.buffer);
+    return await this.hotelService.createHotel(userId, dto, buffers);
   }
 
-  //update status 
+  //update status
   //error 403 forbidden resource
   @Patch('update/status/:id')
   @UseGuards(RoleAuthGuard)
@@ -53,7 +51,6 @@ export class HotelController {
   ) {
     return this.hotelService.updateHotelStatus(id, status);
   }
-
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('delete/:id')
@@ -72,7 +69,6 @@ export class HotelController {
   @Get('find/:slug')
   async getHotelBySlug(@Param('slug') slug: string) {
     return this.hotelService.getHotelBySlug(slug);
-  
   }
   @Get('find/category/:id')
   async getHotelsByCategory(@Param('id', ParseIntPipe) id: number) {

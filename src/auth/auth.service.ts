@@ -30,7 +30,7 @@ export class AuthService {
     };
     const secret = this.config.get('JWT_SECRET');
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: '30m',
       secret,
     });
     return { access_token: token };
@@ -80,9 +80,7 @@ export class AuthService {
     }
   }
 
-  async login(
-    dto: LoginDto,
-  ): Promise<{
+  async login(dto: LoginDto): Promise<{
     access_token: string;
     refresh_token: string;
     userId: number;
@@ -121,7 +119,6 @@ export class AuthService {
   }
   // async refreshAccessToken(refreshToken: string) {
   //   if (!refreshToken) return res.status(401).json("You're not authenticated");
-    
 
   // }
   async validateUserFromToken(token: string): Promise<User | null> {
