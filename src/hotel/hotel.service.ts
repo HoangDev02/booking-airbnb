@@ -128,7 +128,7 @@ export class HotelService {
     updateStatusDto: UpdateHotelStatusDto,
   ) {
     const { status } = updateStatusDto;
-
+    
     // Kiểm tra xem hotel có tồn tại không
     const hotel = await this.prisma.hotel.findUnique({
       where: { id: hotelId },

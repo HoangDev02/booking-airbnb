@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoriesDto } from './dto';
-import { JwtGuard, RoleAuthGuard } from 'src/auth/guard';
+import { RoleAuthGuard } from 'src/auth/guard';
 import { Roles } from 'src/auth/decorator';
 
 @Controller('categories')
@@ -9,7 +9,7 @@ export class CategoriesController {
     constructor(private service: CategoriesService) {}
 
     // number 2 is admin role
-    @UseGuards(JwtGuard, RoleAuthGuard)
+    @UseGuards(RoleAuthGuard)
     @Roles(2)
     @Post('create')
     createCategory(@Body() dto: CreateCategoriesDto){
@@ -23,11 +23,13 @@ export class CategoriesController {
     getCategoryById(@Param('id', ParseIntPipe) id: number){
         return this.service.getCategoryById(id);
     }
+    @UseGuards(RoleAuthGuard)
+    @Roles(2)
     @Patch('update/:id')
     updateCategory(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateCategoriesDto){
         return this.service.updateCategory(id, dto);
     }
-    @UseGuards(JwtGuard, RoleAuthGuard)
+    @UseGuards(RoleAuthGuard)
     @Roles(1)
     @Delete('delete/:id')
     deleteCategoryById(@Param('id', ParseIntPipe) id: number){

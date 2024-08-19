@@ -51,7 +51,9 @@ export class HotelController {
   ) {
     return this.hotelService.updateHotelStatus(id, status);
   }
-
+  
+  @UseGuards(RoleAuthGuard)
+  @Roles(2)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('delete/:id')
   async deleteHotel(@Param('id', ParseIntPipe) id: number) {

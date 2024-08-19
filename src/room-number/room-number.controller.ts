@@ -6,13 +6,19 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { RoomNumberService } from './room-number.service';
 import { CreateRoomNumberDto } from './dto';
+import { RoleAuthGuard } from 'src/auth/guard';
+import { Roles } from 'src/auth/decorator';
 
 @Controller('room-number')
 export class RoomNumberController {
   constructor(private readonly roomNumberService: RoomNumberService) {}
+
+  @UseGuards(RoleAuthGuard)
+  @Roles(3)
   @Post('create')
   async createRoomNumber(@Body() dto: CreateRoomNumberDto) {
     return this.roomNumberService.create(dto);
@@ -33,8 +39,11 @@ export class RoomNumberController {
   @Get('find')
   async getRoomNumberByIdRoomAndNumber(
     @Query('roomId', ParseIntPipe) roomId: number,
-    @Query('number', ParseIntPipe) number: number
+    @Query('number', ParseIntPipe) number: number,
   ) {
-    return this.roomNumberService.getRoomNumberByIdRoomAndNumber(roomId, number);
+    return this.roomNumberService.getRoomNumberByIdRoomAndNumber(
+      roomId,
+      number,
+    );
   }
 }
